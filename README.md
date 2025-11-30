@@ -64,7 +64,7 @@ Para asegurar la ejecución en cualquier entorno, configuré el **Maven Shade Pl
 
 Para evaluar mi proyecto, estos son los pasos para ponerlo en funcionamiento:
 
-1.  **Clonación:** Abrir la terminal y usar `git clone [URL_DEL_REPOSITORIO]`.
+1.  **Clonación:** Abrir la terminal y usar `git clone https://github.com/Alisson-27/POO_Unidad4.git`.
 2.  **Apertura en IDE:** Abrir IntelliJ IDEA y seleccionar **"Open"** o **"Import Project"**, apuntando al archivo **`pom.xml`** clonado.
 3.  **Sincronización:** El IDE descargará automáticamente FlatLaf y Gson (dependencias).
 4.  **Ejecución:** Ejecutar la clase principal **`org.example.vista.ventana`**.
