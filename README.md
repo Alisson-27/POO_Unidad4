@@ -1,84 +1,70 @@
-# 🚀 Proyecto: Gestión de Contactos (Migración a Maven y Serialización JSON)
+# 🗣️ Presentación del Proyecto: Gestión de Contactos (Migración a Maven y JSON)
 
-Este documento resume la migración, modernización, e implementación de nuevas funcionalidades en la aplicación de Gestión de Contactos, cumpliendo con los requisitos de arquitectura moderna y persistencia de datos.
+Este resumen detalla el proceso completo de modernización que apliqué a mi aplicación de Gestión de Contactos, cubriendo los requisitos de arquitectura, persistencia de datos y gestión avanzada de dependencias.
 
-## 1. ⚙️ Arquitectura del Proyecto y Configuración Base
+## 1. ⚙️ Fundación y Configuración Inicial (Migración a Maven)
 
-El proyecto se reestructuró bajo el estándar **Maven** para manejar dependencias y el ciclo de vida de construcción.
+Mi primer paso fue migrar el proyecto a la arquitectura **Maven**, esencial para gestionar dependencias externas y estandarizar el proceso de construcción.
 
-### 1.1 Estructura del Código
+### 1.1 Estructura del Proyecto
 
-| Directorio | Contenido | Propósito |
-| :--- | :--- | :--- |
-| `src/main/java` | Clases del Modelo, Vista y Controlador. | Lógica y presentación del negocio. |
-| `src/main/resources` | **Archivos de Recursos** (`.properties`). | **Ubicación clave** para los archivos de idioma (`idiomas/mensajes_es.properties`).  |
-| `target/` | Archivo JAR final (generado por Maven Shade). | Artefacto ejecutable distribuible. |
+Me aseguré de seguir el estándar de directorios de Maven. Esto fue crucial, especialmente en la colocación de recursos:
 
-### 1.2 `pom.xml` (Gestión de Dependencias y Versiones)
+* **`src/main/resources`:** Aquí ubiqué mi carpeta **`idiomas`**, resolviendo el `MissingResourceException` que encontré inicialmente. Esta es la ubicación oficial de Maven para recursos.
+* **Clase Principal:** Designé a `org.example.vista.ventana` como la clase de inicio en el `pom.xml`.
 
-El archivo `pom.xml` fue configurado para utilizar **Java 21** (coherente con el SDK instalado) y centralizar las versiones en el bloque `<properties>` (Punto 4.a).
+### 1.2 Configuración del JDK y Maven
 
-| Propiedad | Valor | Justificación |
-| :--- | :--- | :--- |
-| `maven.compiler.source` | 21 | Coincide con el JDK de ejecución. |
-| `flatlaf.version` | 3.4.1 | Versión estable para apariencia moderna. |
-| `gson.version` | 2.10.1 | Versión estable para persistencia JSON. |
+Configuré mi entorno para máxima coherencia, lo cual fue vital para resolver el `UnsatisfiedLinkError`:
 
-## 2. 🎨 Modernización y Dependencias (Punto 2)
+* **Entorno de Ejecución:** Utilicé el JDK **Java 21** para ejecutar el proyecto, instalando una versión estable de Oracle OpenJDK.
+* **Coherencia de Versiones:** Sincronicé el **SDK de IntelliJ** y el **Language Level** a **21** para coincidir con el JDK instalado, eliminando conflictos de *runtime*.
+* **POM:** Mi `pom.xml` finaliza con la configuración para compilar en Java 21.
 
-Se incorporaron dos librerías clave, justificadas por su estabilidad y el valor que añaden al proyecto.
+## 2. 🎨 Modernización de la Interfaz y Persistencia (Punto 2 y 3)
 
-### 2.1 FlatLaf (Modernización UI)
+Para modernizar la aplicación y mejorar el manejo de datos, introduje dos librerías clave.
 
-| Aspecto | Uso en el Código | Beneficio |
-| :--- | :--- | :--- |
-| **Integración** | Se añadió la dependencia al `pom.xml` y se invocó `UIManager.setLookAndFeel(new FlatLightLaf())` en el constructor de `ventana.java`. | **Mejora estética radical**, proporcionando un *Look and Feel* plano y profesional a la interfaz Swing. |
+### 2.1 FlatLaf: Apariencia Gráfica Moderna
 
-### 2.2 Google Gson (Persistencia JSON)
+* **Justificación:** Elegí FlatLaf por ser una solución *Look and Feel* activa y ligera, lo que me permitió eliminar el estilo anticuado de Swing.
+* **Implementación:** Llamé a `UIManager.setLookAndFeel(new FlatLightLaf())` en el constructor de `ventana.java`.
 
-| Aspecto | Uso en el Código | Beneficio |
-| :--- | :--- | :--- |
-| **Justificación** | Su repositorio activo y la propiedad de Google garantizan **seguridad** y **estabilidad**.  | Migración de persistencia de CSV a **JSON**, ofreciendo un formato de datos estructurado y legible. |
+### 2.2 Google Gson: Serialización JSON
 
----
+* **Justificación:** Elegí Gson por su estabilidad institucional (Google) y su **API limpia**, que me permite un mapeo directo de objetos a JSON. Su repositorio no introduce dependencias conflictivas.
+* **Impacto:** **Eliminé** la persistencia CSV y refactoricé `personaDAO.java` para manejar la lectura y escritura del archivo **`datosContactos.json`** usando `toJson` y `fromJson`.
 
-## 3. 💾 Manejo de Datos: Serialización JSON (Punto 3)
+### 2.3 Funcionalidad de Importación (Punto 3.b)
 
-Se refactorizó completamente la capa de persistencia (`personaDAO.java`) para gestionar los datos como un objeto JSON único.
+Implementé la funcionalidad de importación, demostrando el manejo de archivos externos:
 
-### 3.1 Serialización y Deserialización (Punto 3.a)
+* Añadí el botón **`btn_importar`** a la interfaz.
+* En `logica_ventana.java`, codifiqué el método `importarContactosJSON()` para usar **`JFileChooser`** y leer un JSON externo, y luego **fusionar** esos contactos con la lista actual (`contactos.addAll()`).
 
-| Método | Función | Proceso |
-| :--- | :--- | :--- |
-| **`guardarContactos()`** | **Serialización.** | Utiliza `gson.toJson(List<persona>, FileWriter)` para escribir la lista completa de contactos en `datosContactos.json`. |
-| **`leerArchivo()`** | **Deserialización.** | Utiliza `gson.fromJson(FileReader, TypeToken)` para restaurar la lista de objetos desde el archivo JSON. |
+## 3. 🔒 Gestión de Dependencias y Despliegue (Punto 4)
 
-### 3.2 Importación de Archivo Externo (Punto 3.b)
+Me enfoqué en la calidad del *build* y la distribución del proyecto.
 
-Esta funcionalidad permite fusionar una fuente de contactos externa con la lista actual.
+### 3.1 Auditoría y Estabilidad
 
-* **Interfaz:** Se añadió el botón **`btn_importar`** a `ventana.java`.
-* **Controlador (`logica_ventana`):** El método `importarContactosJSON()` ejecuta el flujo:
-    1.  Abre un diálogo **`JFileChooser`** para seleccionar el archivo.
-    2.  Llama a `dao.importarContactos()` para leer el JSON externo.
-    3.  Añade los contactos importados a la lista actual (`contactos.addAll()`).
-    4.  Guarda la lista **fusionada** de vuelta al archivo principal.
+* **Versiones Estables:** Centralicé todas las versiones de las librerías (`flatlaf.version`, `gson.version`) en el bloque `<properties>` de Maven, asegurando la trazabilidad.
+* **Dependencias Transitivas:** Confirmé que **no fue necesario** incluir el bloque `<exclusions>` porque FlatLaf y Gson tienen una huella limpia, lo que simplifica mi `pom.xml`.
+
+### 3.2 Despliegue y Distribución
+
+Para asegurar la ejecución en cualquier entorno, configuré el **Maven Shade Plugin**.
+
+* Este *plugin* genera un **JAR monolítico (uber-JAR)** que incluye mi código compilado junto con las librerías FlatLaf y Gson.
+* Esto garantiza que el proyecto es totalmente portátil y ejecutable en cualquier máquina con Java 21 (o superior) sin requerir una instalación manual de dependencias.
 
 ---
 
-## 4. 🔒 Gestión Avanzada de Dependencias (Punto 4)
+## 4. 💻 Instrucciones para Clonar y Ejecutar el Proyecto
 
-Se aplicaron principios de ingeniería de software para la gestión de dependencias externas.
+Para evaluar mi proyecto, estos son los pasos para ponerlo en funcionamiento:
 
-### 4.1 Coherencia y Control de Versiones
-
-Se aseguró que el **SDK (Java 21)**, el **Language Level (21)** en IntelliJ, y los *plugins* de compilación de Maven (`pom.xml`) apunten a la misma versión para evitar inconsistencias en el *runtime*.
-
-### 4.2 Exclusión de Transitivas (Punto 4.b)
-
-* **Determinación:** Se auditó la estructura de dependencias y se confirmó que FlatLaf y Gson **no introducen dependencias transitivas** obsoletas o conflictivas.
-* **Resultado:** Se omitió el uso de las etiquetas `<exclusions>` y `<dependencyManagement>`, manteniendo el proyecto limpio y minimizando la complejidad innecesaria.
-
-### 4.3 Generación del JAR Final
-
-Se utilizó el **Maven Shade Plugin** para empaquetar todo el código de la aplicación junto con las librerías FlatLaf y Gson en un solo archivo `.jar` ejecutable, asegurando que el programa funcione en cualquier entorno Java sin requerir configuración adicional de dependencias.
+1.  **Clonación:** Abrir la terminal y usar `git clone [URL_DEL_REPOSITORIO]`.
+2.  **Apertura en IDE:** Abrir IntelliJ IDEA y seleccionar **"Open"** o **"Import Project"**, apuntando al archivo **`pom.xml`** clonado.
+3.  **Sincronización:** El IDE descargará automáticamente FlatLaf y Gson (dependencias).
+4.  **Ejecución:** Ejecutar la clase principal **`org.example.vista.ventana`**.
